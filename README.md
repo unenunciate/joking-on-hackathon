@@ -1,31 +1,9 @@
-# Social by Polybase
+# JokingOn
 
-A simple social media demo for [Polybase](https://polybase.xyz) (the decentralized database).
+A simple social media demo for [JokingOn](https://jokingon.com).
 
-### Links
-
-📖 [Documentation](https://docs.polybase.xyz)
+# Links
 
 🥽 [Explorer](https://explorer.testnet.polybase.xyz)
 
-👾 [Discord](https://discord.com/invite/DrXkRpCFDX)
-
-🐦 [Twitter](https://twitter.com/polybase_xyz)
-
-
-
-### Get Started
-
-Load the database schema into Polybase:
-
-```
-yarn env yarn load
-```
-
-Then start the application:
-
-```
-yarn install
-yarn start
-```
-
+🐦 [Twitter](https://twitter.com/jokingon)
