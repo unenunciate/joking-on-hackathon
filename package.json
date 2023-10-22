@@ -1,7 +1,10 @@
 {
   "name": "JokingOn",
   "version": "0.1.0",
-  "private": true,
+  "private": false,
+  "repository": {
+    "url": "https://github.com/unenunciate/jokingon-demo"
+  },
   "scripts": {
     "start": "react-app-rewired start",
     "build": "react-app-rewired build",
