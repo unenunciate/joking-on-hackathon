@@ -14,12 +14,12 @@ import { AuthProvider } from 'features/users/AuthProvider'
 import { CaptureProvider } from 'features/capture/CaptureProvider'
 
 import { PolybaseProvider } from '@polybase/react'
-import polybase from 'config/polybase'
+import POLYBASE from 'config/polybase'
 
 
 export const App = () => {
   return (
-    <PolybaseProvider polybase={polybase}>
+    <PolybaseProvider polybase={POLYBASE}>
       <AuthProvider
         domain={process.env.REACT_APP_DOMAIN}
         storagePrefix={process.env.REACT_APP_AUTH_STORAGE_PREFIX}
