@@ -3,9 +3,12 @@ export interface User {
   name?: string
   desc?: string
   icon?: string
-  account: string
   pvkey: string
   $pk: string
+  laughsEarned?: number
+  laughedAt?: string[]
+  laughs?: string[]
+  $lit?: any
 }
 
 export interface Follower {
@@ -16,10 +19,31 @@ export interface Follower {
   $pk: string
 }
 
-export interface Message {
+export interface Joke {
   id: string
-  message: string
-  account: string
+  title: string
   timestamp: string
+  account: string
+  video: string
+  laughs: number
+  laughers: string[]
   $pk: string
+  $lit: any
+}
+
+export interface Laugh {
+  id: string
+  joke: string
+  timestamp: string
+  audio: string
+  proof: string
+  verified: boolean
+  $pk: string
+  $lit: any
+}
+
+export interface Recorder {
+  start : () => Promise<unknown>
+  stop: () => Promise<unknown>
+  getMP3: () => Promise<[buffer: Buffer, blob: Blob]>
 }

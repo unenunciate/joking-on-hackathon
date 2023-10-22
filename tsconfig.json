@@ -22,7 +22,8 @@
     "baseUrl": "src"
   },
   "include": [
-    "src"
+    "src/**/*",
+    "src/modules/types/recorder.d.ts"
   ]
 }
 

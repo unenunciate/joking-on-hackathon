@@ -5,14 +5,15 @@ import { map } from 'lodash'
 import moment from 'moment'
 import { Layout } from 'features/common/Layout'
 import { useCollection, useDocument, usePolybase } from '@polybase/react'
-import { Message, User } from 'features/types'
+import { Joke, User, Laugh } from 'features/types'
 import { useParams, Link } from 'react-router-dom'
 import { useAuth } from 'features/users/useAuth'
 import { useAsyncCallback } from 'modules/common/useAsyncCallback'
-import { MessageBox } from 'features/message/Message'
+import { JokeBox } from 'features/joke/Joke'
 
 export function ProfileDetail() {
-  const [msg, setMsg] = useState('')
+  const [title, setTitle] = useState('')
+  const [video, setVideo] = useState('')
   const { account } = useParams()
   const polybase = usePolybase()
 
@@ -22,9 +23,17 @@ export function ProfileDetail() {
     account ? polybase.collection('demo/social/users').record(account) : null,
   )
 
-  const { data: messages } = useCollection<Message>(
+  const { data: jokes } = useCollection<Joke>(
     account
-      ? polybase.collection('demo/social/messages')
+      ? polybase.collection(`${process.env.POLYBASE_JOKINGON_COLLECTION}/jokes`)
+        .where('account', '==', account)
+        .sort('timestamp', 'desc')
+      : null,
+  )
+
+  const { data: laughs } = useCollection<Laugh>(
+    account
+      ? polybase.collection(`${process.env.POLYBASE_JOKINGON_COLLECTION}/laughs`)
         .where('account', '==', account)
         .sort('timestamp', 'desc')
       : null,
@@ -33,19 +42,19 @@ export function ProfileDetail() {
   const share = useAsyncCallback(async (e) => {
     e.preventDefault()
     const pk = auth?.wallet?.getPublicKeyString()
-    if (!pk || !account) throw new Error('You must be logged in to share a message')
-    await polybase.collection<Message>('demo/social/messages').create([
+    if (!pk || !account) throw new Error('You must be logged in to share a joke')
+    await polybase.collection<Joke>(`${process.env.POLYBASE_JOKINGON_COLLECTION}/jokes`).create([
       nanoid(),
       account,
-      msg,
+      title,
       moment().toISOString(),
     ])
-    setMsg('')
+    setTitle('')
   })
 
-  const messagesEl = map(messages?.data, ({ data }) => {
+  const jokesEl = map(jokes?.data, ({ data }) => {
     return (
-      <MessageBox key={data.id} message={data} />
+      <JokeBox key={data.id} joke={data} />
     )
   })
 
@@ -75,17 +84,17 @@ export function ProfileDetail() {
 
             <Box>
               <Stack spacing={3}>
-                <Heading size={'md'}>Messages</Heading>
+                <Heading size={'md'}>Jokes</Heading>
                 {auth?.account === account && (
                   <form onSubmit={share.execute}>
                     <HStack>
-                      <Input value={msg} placeholder='Write something...' onChange={(e) => setMsg(e.target.value)} />
+                      <Input value={title} placeholder='Write something...' onChange={(e) => setTitle(e.target.value)} />
                       <Button type='submit' isLoading={share.loading} onClick={share.execute}>Share</Button>
                     </HStack>
                   </form>
                 )}
                 <Stack>
-                  {messagesEl}
+                  {jokesEl}
                 </Stack>
               </Stack>
             </Box>

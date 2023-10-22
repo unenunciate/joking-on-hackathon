@@ -14,10 +14,24 @@ collection users {
   pvkey: string;
   $pk: string;
 
+  laughsEarned: number;
+  laughedAt: string[];
+  laughs: string[];
+
+  @delegate
+  $lit: PublicKey;
+
+  @index(account, [laughsEarned, desc]);
+
   constructor (id: string, pvkey: string) {
     this.id = id;
     this.$pk = ctx.publicKey.toHex();
     this.pvkey = pvkey;
+    this.laughsEarned = 0;
+    this.laughedAt = [];
+    this.laughs = [];
+
+    this.$lit = ${process.env.LIT_ACTION_PKP};
   }
 
   setProfile(name?: string, desc?: string) {
@@ -29,6 +43,33 @@ collection users {
     }
     if (this.desc) {
       this.desc = desc;
+    }
+  }
+
+  addVerifiedLaughEarned() {
+    if (this.$lit.toHex() !== ctx.publicKey.toHex()) {
+      throw error('Invalid Caller: Function may only be called by Lit Protocal delegated PKP!');
+    }
+
+    this.laughsEarned = this.laughsEarned + 1;
+  }
+
+  laughVerified(laugh: string, joke: string) {
+    if (this.$lit.toHex() !== ctx.publicKey.toHex()) {
+      throw error('Invalid Caller: Function may only be called by Lit Protocal delegated PKP!');
+    }
+
+    bool found = false;
+
+    this.laughs.foreach((l: PublicKey) => {
+      if(l === laugh) {
+        found = true;
+      }
+    })
+
+    if(!found) {
+      this.laughs.push(laugh);
+      this.laughedAt.push(joke);
     }
   }
 }
@@ -55,16 +96,87 @@ collection messages {
   message: string;
   timestamp: string;
   account: string;
+  video: string;
+  laughs: number;
+  laughers: PublicKey[];
   $pk: string;
+
+  @delegate
+  $lit: PublicKey;
 
   @index(account, [timestamp, desc]);
 
-  constructor (id: string, account: string, message: string, timestamp: string) {
+  constructor (id: string, account: string, message: string, timestamp: string, video: string) {
     this.id = id;
     this.$pk = ctx.publicKey.toHex();
     this.account = account;
     this.message = message;
     this.timestamp = timestamp;
+    this.video = video;
+    this.laughs = 0;
+    this.laughers = PublicKey[];
+
+    this.$lit = ${process.env.LIT_ACTION_PKP};
+  }
+
+  @call($lit)
+  function addVerifiedLaugh(laugher: PublicKey) {
+    if (this.$lit.toHex() !== ctx.publicKey.toHex()) {
+      throw error('Invalid Caller: Function may only be called by Lit Protocal delegated PKP!');
+    }
+
+    bool found = false;
+
+    this.laughers.foreach((l: PublicKey) => {
+      if(l === laugher) {
+        found = true;
+      }
+    })
+
+    if(!found) {
+      this.laughers.push(laugher);
+    }
+
+    this.laughs = this.laughs + 1;
+  }
+}
+
+@public
+collection laughs {
+  id: string;
+  joke: string;
+  timestamp: string;
+  audio: string;
+  proof: string;
+  verified: bool;
+  $pk: string;
+
+  @delegate
+  $lit: PublicKey;
+
+  @index(id, [joke, $pk, timestamp, verified]);
+
+  constructor (id: string, joke: string, timestamp: string, audio: string, proof: string) {
+    this.id = id;
+    this.$pk = ctx.publicKey.toHex();
+    this.joke = joke;
+    this.timestamp = timestamp;
+    this.audio = audio;
+    this.proof = proof;
+    this.verified = false;
+
+    this.$lit = ${process.env.LIT_ACTION_PKP};
+  }
+
+  @call($lit)
+  verifyLaugh(laugher: PublicKey) {
+      if (this.$lit.toHex() !== ctx.publicKey.toHex()) {
+        throw error('Invalid Caller: Function may only be called by Lit Protocal delegated PKP!');
+      }
+
+      if(!verified) {
+        this.verified = true;
+      }
   }
 }
 `
@@ -84,7 +196,7 @@ async function load() {
     throw new Error('No private key provided')
   }
 
-  await db.applySchema(schema, 'demo/social')
+  await db.applySchema(schema, 'jokingon/hackathon')
 
   return 'Schema loaded'
 }
