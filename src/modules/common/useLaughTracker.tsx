@@ -1,24 +1,29 @@
-import { useState, useEffect, useContext } from 'react'
+import React, { useState, useEffect, useContext, RefObject } from 'react'
 
 import { useToast } from '@chakra-ui/react'
 import * as Sentry from '@sentry/react'
 
 import { CaptureContext } from 'features/capture/CaptureProvider'
 
-export type ExtendedOptions<R> = {
-  autoplay?: boolean
+import { Joke } from 'features/types'
+
+export interface ExtendedOptions {
+  autoPlay?: boolean
   alwaysFocused?: boolean
+  currentlyFocused?: boolean
 }
 
-export default function useLaughTracker<R = unknown, Args extends any[] = any[]>(joke: string, options?: ExtendedOptions<R>) {
+export default function useLaughTracker<Joke> (joke: Joke, videoRef : RefObject<HTMLVideoElement> , autoPlay: boolean = true, alwaysFocused: boolean = true, currentlyFocused: boolean = true) : [setPlaying: (state: boolean) => void, setFocused: (state: boolean) => void, timeFocused: number] {
+    const [playing, setPlaying] = useState(autoPlay)
+    const [focused, setFocused] = useState(alwaysFocused ? true : currentlyFocused ? true : false)
+    const [timeFocused, setTimeFocused] = useState(0)
 
-    const [playing, setPlaying] = useState(options?.autoplay ?? false)
-    const [focused, setFocused] = useState(options?.alwaysFocused ?? false)
+    const [clipsToBeAnalyzed, setClipsToBeAnalyzed] = useState([])
 
-    const {capture, loading} = useContext(CaptureContext)
+    const {capture, loading, paused, createClip, pauseCapture, resumeCapture} = useContext(CaptureContext)
 
     const toast = useToast()
 
-    return [setPlaying, setFocused];
+    return [setPlaying, setFocused, timeFocused]
 
 }

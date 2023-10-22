@@ -10,7 +10,7 @@ export function Home() {
   const polybase = usePolybase()
 
   const { auth } = useAuth()
-  const { data } = useCollection<User>(polybase.collection('demo/social/users'))
+  const { data } = useCollection<User>(polybase.collection(`${process.env.POLYBASE}/users`))
 
   const usersEl = map(data?.data, ({ data }) => {
     return (
@@ -18,7 +18,7 @@ export function Home() {
         <Box borderRadius='md' bg='bw.50' p={4}>
           <Stack>
             <Heading size='md'>
-              {data?.name ?? 'Anon'}{(auth && (auth?.account === data.account)) ? ' (You)' : ''}
+              {data?.name ?? 'Anon'}{(auth && (auth?.wallet.getAddressString() === `0x${data.$pk}`)) ? ' (You)' : ''}
             </Heading>
             <Box>
               {data.id}

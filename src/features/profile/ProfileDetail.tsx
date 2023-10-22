@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Box, Heading, Container, VStack, Stack, Input, HStack, Button, Spacer, Link as ChakraLink } from '@chakra-ui/react'
+import { Flex, Box, Heading, Container, VStack, Stack, Input, HStack, Button, Spacer, Link as ChakraLink } from '@chakra-ui/react'
 import { nanoid } from 'nanoid'
 import { map } from 'lodash'
 import moment from 'moment'
@@ -10,24 +10,24 @@ import { useParams, Link } from 'react-router-dom'
 import { useAuth } from 'features/users/useAuth'
 import { useAsyncCallback } from 'modules/common/useAsyncCallback'
 import { JokeBox } from 'features/joke/Joke'
+import { LaughBox } from 'features/laugh/Laugh'
 
 export function ProfileDetail() {
   const [title, setTitle] = useState('')
   const [video, setVideo] = useState('')
+
   const { account } = useParams()
   const polybase = usePolybase()
 
   const { auth } = useAuth()
 
-  const { data } = useDocument<User>(
-    account ? polybase.collection('demo/social/users').record(account) : null,
-  )
+  const { data } = useDocument<User>(account ? polybase.collection((`${process.env.POLYBASE_JOKINGON_COLLECTION}/users`)).record(account) : null)
 
   const { data: jokes } = useCollection<Joke>(
     account
       ? polybase.collection(`${process.env.POLYBASE_JOKINGON_COLLECTION}/jokes`)
         .where('account', '==', account)
-        .sort('timestamp', 'desc')
+        .sort('datetime', 'desc')
       : null,
   )
 
@@ -35,26 +35,40 @@ export function ProfileDetail() {
     account
       ? polybase.collection(`${process.env.POLYBASE_JOKINGON_COLLECTION}/laughs`)
         .where('account', '==', account)
-        .sort('timestamp', 'desc')
+        .sort('datetime', 'desc')
       : null,
   )
 
   const share = useAsyncCallback(async (e) => {
     e.preventDefault()
+
     const pk = auth?.wallet?.getPublicKeyString()
+
     if (!pk || !account) throw new Error('You must be logged in to share a joke')
+
+    const videoIPFSHash = ''
+
     await polybase.collection<Joke>(`${process.env.POLYBASE_JOKINGON_COLLECTION}/jokes`).create([
       nanoid(),
-      account,
       title,
       moment().toISOString(),
+      account,
+      videoIPFSHash,
     ])
+
     setTitle('')
+    setVideo('')
   })
 
   const jokesEl = map(jokes?.data, ({ data }) => {
     return (
       <JokeBox key={data.id} joke={data} />
+    )
+  })
+
+  const laughsEl = map(laughs?.data, ({ data }) => {
+    return (
+      <LaughBox key={data.id} laugh={data} />
     )
   })
 
@@ -77,27 +91,38 @@ export function ProfileDetail() {
                   )}
                 </HStack>
                 <Heading size='sm' color='bw.600' fontWeight='normal'>
-                  <ChakraLink isExternal href={`https://explorer.testnet.polybase.xyz/collections/demo%2Fsocial%2Fusers/${data?.data?.id}`}>{data?.data?.id} ↗️</ChakraLink>
+                  <ChakraLink isExternal href={`${process.env.POLYBASE_JOKINGON_COLLECTION_EXPLORER_URL}/users/${data?.data?.id}`}> {data?.data?.id} ↗️ </ChakraLink>
                 </Heading>
               </Stack>
             </Box>
 
             <Box>
-              <Stack spacing={3}>
-                <Heading size={'md'}>Jokes</Heading>
-                {auth?.account === account && (
+              {auth?.account === account && (
                   <form onSubmit={share.execute}>
                     <HStack>
-                      <Input value={title} placeholder='Write something...' onChange={(e) => setTitle(e.target.value)} />
+                      <Input value={title} placeholder='Write a title...' onChange={(e) => setTitle(e.target.value)} />
+                      <Input type='file' value={video} placeholder='Select a video...' onChange={(e) => setVideo(e.target.value)} />
                       <Button type='submit' isLoading={share.loading} onClick={share.execute}>Share</Button>
                     </HStack>
                   </form>
                 )}
+            </Box>
+
+            <Flex justifyContent={'space-between'} flexDirection={'column'} width={'max'} height={'full'}>
+              <Stack spacing={3}>
+                <Heading size={'md'}>Jokes</Heading>
                 <Stack>
                   {jokesEl}
                 </Stack>
               </Stack>
-            </Box>
+
+              <Stack spacing={3}>
+                <Heading size={'md'}>Laughs</Heading>
+                <Stack>
+                  {laughsEl}
+                </Stack>
+              </Stack>
+            </Flex>
           </Stack>
         </Container>
       </VStack>

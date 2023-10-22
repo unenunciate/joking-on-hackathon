@@ -1,4 +1,4 @@
-import React from 'react'
+import { useRef } from 'react'
 import { Box, HStack, Stack, Button, Link as ChakraLink, Spacer } from '@chakra-ui/react'
 import moment from 'moment'
 import { Joke } from 'features/types'
@@ -13,7 +13,9 @@ export interface JokeBoxProps {
 export function JokeBox({ joke }: JokeBoxProps) {
   const link = `${process.env.POLYBASE_JOKINGON_COLLECTION_EXPLORER_URL}/jokes/${joke.id}`
 
-  const [videoRef, setPlaying] = useLaughTracker();
+  const videoRef = useRef<HTMLVideoElement>(null)
+
+  const [setPlaying, setFocused, timeFocused] = useLaughTracker(joke, videoRef)
 
   return (
     <Box bg='bw.50' borderRadius='md' p={4} key={joke.id}>
@@ -28,7 +30,8 @@ export function JokeBox({ joke }: JokeBoxProps) {
             </Box>
           )}
           <Spacer />
-            <video ref={videoRef} src={`${joke.video}`} autoPlay={true} muted={true} onPlay={setPlaying(true)} onPause={setPlaying(false)} loop={true} />
+            <video ref={videoRef} src={`${joke.video}`} autoPlay={true} muted={true} onPlay={() => {setPlaying(true)}} onPause={() => {setPlaying(false)}} loop={true}>
+            </video>
           <Spacer />
           <Button size={'xs'}>
             <ChakraLink isExternal href={link}>

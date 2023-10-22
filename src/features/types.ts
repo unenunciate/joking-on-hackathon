@@ -41,9 +41,3 @@ export interface Laugh {
   $pk: string
   $lit: any
 }
-
-export interface Recorder {
-  start : () => Promise<unknown>
-  stop: () => Promise<unknown>
-  getMP3: () => Promise<[buffer: Buffer, blob: Blob]>
-}

@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useCallback, useEffect, use
 
 import { useToast } from '@chakra-ui/react'
 import * as Sentry from '@sentry/react'
+
 // import ReactGA from 'react-ga'
 // import posthog from 'posthog-js'
 
@@ -14,15 +15,21 @@ import { cloneDeep } from 'lodash'
 export interface CaptureContextValue {
   capture: Recorder | null
   loading: boolean
+  paused: boolean
   destory: () => Promise<void>
   createClip: () => Promise<[buffer: Buffer, blob: Blob] | null>
+  pauseCapture: () => Promise<boolean>
+  resumeCapture: () => Promise<boolean>
 }
 
 export const CaptureContext = createContext<CaptureContextValue>({
-  loading: true,
   capture: null,
+  loading: true,
+  paused: true,
   destory: async () => { console.log('demo logout') },
   createClip: async () => (null),
+  pauseCapture: async () => (false),
+  resumeCapture: async () => (false),
 })
 
 export interface CaptureProviderProps {
@@ -32,7 +39,8 @@ export interface CaptureProviderProps {
 export function CaptureProvider({ children }: CaptureProviderProps) {
   const [capture, setCapture] = useState<Recorder | null>(null)
   const [standbyCapture, setStandbyCapture] = useState<Recorder | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState<boolean>(true)
+  const [paused, setPaused] = useState<boolean>(false)
 
   const session : AuthContextValue = useContext(AuthContext)
 
@@ -45,6 +53,8 @@ export function CaptureProvider({ children }: CaptureProviderProps) {
     // Sentry.setUser(null)
     setCapture(null)
     setStandbyCapture(null)
+    setLoading(true)
+    setPaused(true)
   }, [capture, setCapture, setStandbyCapture])
 
   const start = useCallback(async () => {
@@ -52,6 +62,7 @@ export function CaptureProvider({ children }: CaptureProviderProps) {
         if(session.auth?.wallet) {
             await capture?.start()
             setLoading(false)
+            setPaused(false)
         } else {
             throw(new Error('User not logged in.'))
         }
@@ -68,7 +79,7 @@ export function CaptureProvider({ children }: CaptureProviderProps) {
             Sentry.captureException(e)
         }
     }
-  }, [capture, session, toast])
+  }, [capture, session, toast, setLoading, setPaused])
 
   const createClip = useCallback(async () => {
       try {
@@ -104,6 +115,68 @@ export function CaptureProvider({ children }: CaptureProviderProps) {
         }
       }, [capture, session, standbyCapture, setCapture, setStandbyCapture, setLoading, toast])
 
+  const pauseCapture = useCallback(async () => {
+    try {
+      if (session && capture && !paused) {
+          try {
+            setPaused(true)
+            setLoading(true)
+            setCapture(await capture.stop())
+            setStandbyCapture(null)
+            setLoading(false)
+            return true
+          } catch (e: any) {
+              toast({
+                  status: 'error',
+                  title: 'Microphone Pause Failed',
+                  description: e?.message,
+                  isClosable: true,
+                  duration: 9000,
+              })
+              if (process.env.LOG_ERRORS !== 'false') {
+                  Sentry.captureException(e)
+              }
+              return false
+          }
+          } else {
+              throw(new Error('User not logged in or capture not functioning.'))
+          }
+      } catch (e: any) {
+        return false
+      }
+  }, [capture, session, setCapture, paused, setPaused, setStandbyCapture, setLoading, toast])
+
+  const resumeCapture = useCallback(async () => {
+    try {
+      if (session && capture && paused) {
+          try {
+            await capture.start()
+            setCapture(capture)
+            setStandbyCapture(cloneDeep(capture))
+            setLoading(false)
+            setPaused(false)
+            return true
+          } catch (e: any) {
+              toast({
+                  status: 'error',
+                  title: 'Microphone Pause Failed',
+                  description: e?.message,
+                  isClosable: true,
+                  duration: 9000,
+              })
+              if (process.env.LOG_ERRORS !== 'false') {
+                  Sentry.captureException(e)
+              }
+              return false
+          }
+          } else {
+              throw(new Error('User not logged in or capture not functioning.'))
+          }
+      } catch (e: any) {
+        return false
+      }
+  }, [capture, session, setCapture, paused, setPaused, setStandbyCapture, setLoading, toast])
+
   useEffect(() => {
     // const userId = Cookies.get(userIdPath)
     if(capture === null) {
@@ -119,21 +192,24 @@ export function CaptureProvider({ children }: CaptureProviderProps) {
   }, [capture, setCapture, setStandbyCapture, setLoading])
 
   useEffect(() => {
-      if(session?.auth?.wallet && capture && !loading) {
+      if(session?.auth?.wallet && capture && !loading && !paused) {
         start()
       }
 
       if(session === null && capture !== null) {
         destory()
       }
-  }, [session, capture, loading, destory, start])
+  }, [session, capture, loading, paused, destory, start])
 
   const value = useMemo(() => ({
     capture,
     loading,
+    paused,
     destory,
     createClip,
-  }), [capture, loading, destory, createClip])
+    pauseCapture,
+    resumeCapture,
+  }), [capture, loading, paused, destory, createClip, pauseCapture, resumeCapture])
 
   return (
     <CaptureContext.Provider value={value}>

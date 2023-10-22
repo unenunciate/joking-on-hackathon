@@ -9,7 +9,10 @@ import theme from './theme'
 import AppRoutes from './AppRoutes'
 import ScrollToTop from 'modules/common/ScrollToTop'
 import PostHogPageView from 'modules/common/PostHogPageView'
+
 import { AuthProvider } from 'features/users/AuthProvider'
+import { CaptureProvider } from 'features/capture/CaptureProvider'
+
 import { PolybaseProvider } from '@polybase/react'
 import polybase from 'config/polybase'
 
@@ -21,14 +24,16 @@ export const App = () => {
         domain={process.env.REACT_APP_DOMAIN}
         storagePrefix={process.env.REACT_APP_AUTH_STORAGE_PREFIX}
       >
-        <ChakraProvider theme={theme}>
-          <Global styles={[globalStyles]} />
-          <Router>
-            <PostHogPageView />
-            <ScrollToTop />
-            <AppRoutes />
-          </Router>
-        </ChakraProvider>
+        <CaptureProvider>
+          <ChakraProvider theme={theme}>
+            <Global styles={[globalStyles]} />
+            <Router>
+              <PostHogPageView />
+              <ScrollToTop />
+              <AppRoutes />
+            </Router>
+          </ChakraProvider>
+        </CaptureProvider>
       </AuthProvider>
     </PolybaseProvider>
   )

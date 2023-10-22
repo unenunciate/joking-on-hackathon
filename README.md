@@ -1,6 +1,6 @@
 # JokingOn
 
-A simple social media demo for [JokingOn](https://jokingon.com).
+A simple social media demo for [JokingOn](https://demo.jokingon.com).
 
 # Links
 

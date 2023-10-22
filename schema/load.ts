@@ -91,10 +91,10 @@ collection followers {
 }
 
 @public
-collection messages {
+collection jokes {
   id: string;
-  message: string;
-  timestamp: string;
+  title: string;
+  datetime: string;
   account: string;
   video: string;
   laughs: number;
@@ -106,12 +106,12 @@ collection messages {
 
   @index(account, [timestamp, desc]);
 
-  constructor (id: string, account: string, message: string, timestamp: string, video: string) {
+  constructor (id: string, account: string, title: string, datetime: string, video: string) {
     this.id = id;
     this.$pk = ctx.publicKey.toHex();
     this.account = account;
-    this.message = message;
-    this.timestamp = timestamp;
+    this.title = title;
+    this.datetime = datetime;
     this.video = video;
     this.laughs = 0;
     this.laughers = PublicKey[];
@@ -145,6 +145,7 @@ collection messages {
 collection laughs {
   id: string;
   joke: string;
+  datetime: string;
   timestamp: string;
   audio: string;
   proof: string;
@@ -156,10 +157,11 @@ collection laughs {
 
   @index(id, [joke, $pk, timestamp, verified]);
 
-  constructor (id: string, joke: string, timestamp: string, audio: string, proof: string) {
+  constructor (id: string, joke: string, datetime: string, timestamp: string, audio: string, proof: string) {
     this.id = id;
     this.$pk = ctx.publicKey.toHex();
     this.joke = joke;
+    this.datetime = datetime;
     this.timestamp = timestamp;
     this.audio = audio;
     this.proof = proof;
@@ -185,7 +187,7 @@ const PRIVATE_KEY = process.env.PRIVATE_KEY ?? ''
 
 async function load() {
   const db = new Polybase({
-    baseURL: `${process.env.REACT_APP_API_URL}/v0`,
+    baseURL: `${process.env.REACT_APP_API_URL}/v3`,
     signer: async (data) => {
       const wallet = Wallet.fromPrivateKey(Buffer.from(PRIVATE_KEY, 'hex'))
       return { h: 'eth-personal-sign', sig: ethPersonalSign(wallet.getPrivateKey(), data) }
