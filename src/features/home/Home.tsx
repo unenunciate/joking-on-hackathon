@@ -3,16 +3,33 @@ import { Link } from 'react-router-dom'
 import { usePolybase, useCollection } from '@polybase/react'
 import { map } from 'lodash'
 import { Layout } from 'features/common/Layout'
-import { User } from 'features/types'
+import { User, Joke } from 'features/types'
 import { useAuth } from 'features/users/useAuth'
+import { JokeBox } from 'features/joke/Joke'
 
 export function Home() {
   const polybase = usePolybase()
 
   const { auth } = useAuth()
-  const { data } = useCollection<User>(polybase.collection(`${process.env.POLYBASE}/users`))
+  /**
+  const { data: users } = useCollection<User>(polybase.collection(`${process.env.POLYBASE}/users`))
+ */
+  const { data: jokes } = useCollection<Joke>(
+    auth?.account
+      ? polybase.collection(`${process.env.POLYBASE_JOKINGON_COLLECTION}/jokes`)
+        .where('account', '==', auth.account)
+        .sort('datetime', 'desc')
+      : null,
+  )
 
-  const usersEl = map(data?.data, ({ data }) => {
+  const jokesEl = map(jokes?.data, ({ data }) => {
+    return (
+      <JokeBox key={data.id} joke={data} />
+    )
+  })
+
+  /**
+  const usersEl = map(users?.data, ({ data }) => {
     return (
       <Link to={`/profiles/${data.id}`} key={data.id}>
         <Box borderRadius='md' bg='bw.50' p={4}>
@@ -28,20 +45,21 @@ export function Home() {
       </Link>
     )
   })
+  */
 
   return (
     <Layout>
       <Container size='lg'>
         <VStack align={'left'} spacing={8}>
           <Heading size='lg'>
-            Social is a demo app for the <ChakraLink href='https://polybase.xyz'>Polybase</ChakraLink> decentralized database.
+            This is a demo app for <ChakraLink href='https://jokingon.com'>JokingOn</ChakraLink>: the comedy economy.
           </Heading>
           <Text>
             Many featuers are not implemented or are WIP.
           </Text>
           <Box>
             <Stack spacing='6'>
-              {usersEl}
+              {jokesEl}
             </Stack>
           </Box>
         </VStack>

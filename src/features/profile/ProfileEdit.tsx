@@ -1,21 +1,18 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import {
   Box, Heading, Container,
   VStack, Stack, Input, FormControl, FormLabel, Button,
   FormHelperText,
 } from '@chakra-ui/react'
-import { nanoid } from 'nanoid'
-import moment from 'moment'
 import { useForm } from 'react-hook-form'
 import { Layout } from 'features/common/Layout'
 import { useDocument, usePolybase } from '@polybase/react'
-import { Message, User } from 'features/types'
+import { User } from 'features/types'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from 'features/users/useAuth'
 import { useAsyncCallback } from 'modules/common/useAsyncCallback'
 
 export function ProfileEdit() {
-  const [msg, setMsg] = useState('')
   const navigate = useNavigate()
   const polybase = usePolybase()
   const { handleSubmit, register, reset } = useForm()
@@ -30,7 +27,7 @@ export function ProfileEdit() {
   }, [account, navigate])
 
   const { data } = useDocument<User>(
-    account ? polybase.collection('demo/social/users').doc(account) : null,
+    account ? polybase.collection(`${process.env.POLYBASE_JOKINGON_COLLECTION}/users`).doc(account) : null,
   )
 
   useEffect(() => {
@@ -41,9 +38,9 @@ export function ProfileEdit() {
 
   const onEdit = useAsyncCallback(async (data) => {
     if (!account) return
-    await polybase.collection<Message>('demo/social/users').doc(account)
+    await polybase.collection<User>(`${process.env.POLYBASE_JOKINGON_COLLECTION}/users`).doc(account)
       .call('setProfile', [data.name, data.desc])
-    setMsg('')
+
     navigate(`/profiles/${account}`)
   })
 
