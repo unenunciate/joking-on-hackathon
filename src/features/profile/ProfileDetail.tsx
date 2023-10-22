@@ -12,6 +12,8 @@ import { useAsyncCallback } from 'modules/common/useAsyncCallback'
 import { JokeBox } from 'features/joke/Joke'
 import { LaughBox } from 'features/laugh/Laugh'
 
+import { POLYBASE_SCHEMA_COLLECTION_EXPLORER_URL, SCHEMA_VERSION_CHUNK } from 'config/polybase'
+
 export function ProfileDetail() {
   const [title, setTitle] = useState('')
   const [video, setVideo] = useState('')
@@ -21,11 +23,11 @@ export function ProfileDetail() {
 
   const { auth } = useAuth()
 
-  const { data } = useDocument<User>(account ? polybase.collection((`${process.env.POLYBASE_JOKINGON_COLLECTION}/users`)).record(account) : null)
+  const { data } = useDocument<User>(account ? polybase.collection((`${SCHEMA_VERSION_CHUNK}/users`)).record(account) : null)
 
   const { data: jokes } = useCollection<Joke>(
     account
-      ? polybase.collection(`${process.env.POLYBASE_JOKINGON_COLLECTION}/jokes`)
+      ? polybase.collection(`${SCHEMA_VERSION_CHUNK}/jokes`)
         .where('account', '==', account)
         .sort('datetime', 'desc')
       : null,
@@ -33,7 +35,7 @@ export function ProfileDetail() {
 
   const { data: laughs } = useCollection<Laugh>(
     account
-      ? polybase.collection(`${process.env.POLYBASE_JOKINGON_COLLECTION}/laughs`)
+      ? polybase.collection(`${SCHEMA_VERSION_CHUNK}/laughs`)
         .where('account', '==', account)
         .sort('datetime', 'desc')
       : null,
@@ -48,7 +50,7 @@ export function ProfileDetail() {
 
     const videoIPFSHash = ''
 
-    await polybase.collection<Joke>(`${process.env.POLYBASE_JOKINGON_COLLECTION}/jokes`).create([
+    await polybase.collection<Joke>(`${SCHEMA_VERSION_CHUNK}/jokes`).create([
       nanoid(),
       title,
       moment().toISOString(),
@@ -91,7 +93,7 @@ export function ProfileDetail() {
                   )}
                 </HStack>
                 <Heading size='sm' color='bw.600' fontWeight='normal'>
-                  <ChakraLink isExternal href={`${process.env.POLYBASE_JOKINGON_COLLECTION_EXPLORER_URL}/users/${data?.data?.id}`}> {data?.data?.id} ↗️ </ChakraLink>
+                  <ChakraLink isExternal href={`${POLYBASE_SCHEMA_COLLECTION_EXPLORER_URL}/users/${data?.data?.id}`}> {data?.data?.id} ↗️ </ChakraLink>
                 </Heading>
               </Stack>
             </Box>

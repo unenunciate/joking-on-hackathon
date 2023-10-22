@@ -3,6 +3,8 @@ import { Box, HStack, Stack, Button, Link as ChakraLink, Spacer } from '@chakra-
 import moment from 'moment'
 import { Joke } from 'features/types'
 
+import { POLYBASE_SCHEMA_COLLECTION_EXPLORER_URL } from 'config/polybase'
+
 import useLaughTracker from 'modules/common/useLaughTracker'
 
 export interface JokeBoxProps {
@@ -11,7 +13,7 @@ export interface JokeBoxProps {
 
 
 export function JokeBox({ joke }: JokeBoxProps) {
-  const link = `${process.env.POLYBASE_JOKINGON_COLLECTION_EXPLORER_URL}/jokes/${joke.id}`
+  const link = `${POLYBASE_SCHEMA_COLLECTION_EXPLORER_URL}/jokes/${joke.id}`
 
   const videoRef = useRef<HTMLVideoElement>(null)
 

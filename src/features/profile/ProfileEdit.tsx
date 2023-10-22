@@ -12,6 +12,8 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from 'features/users/useAuth'
 import { useAsyncCallback } from 'modules/common/useAsyncCallback'
 
+import { SCHEMA_VERSION_CHUNK } from 'config/polybase'
+
 export function ProfileEdit() {
   const navigate = useNavigate()
   const polybase = usePolybase()
@@ -27,7 +29,7 @@ export function ProfileEdit() {
   }, [account, navigate])
 
   const { data } = useDocument<User>(
-    account ? polybase.collection(`${process.env.POLYBASE_JOKINGON_COLLECTION}/users`).doc(account) : null,
+    account ? polybase.collection(`${SCHEMA_VERSION_CHUNK}/users`).doc(account) : null,
   )
 
   useEffect(() => {
@@ -38,7 +40,7 @@ export function ProfileEdit() {
 
   const onEdit = useAsyncCallback(async (data) => {
     if (!account) return
-    await polybase.collection<User>(`${process.env.POLYBASE_JOKINGON_COLLECTION}/users`).doc(account)
+    await polybase.collection<User>(`${SCHEMA_VERSION_CHUNK}/users`).doc(account)
       .call('setProfile', [data.name, data.desc])
 
     navigate(`/profiles/${account}`)

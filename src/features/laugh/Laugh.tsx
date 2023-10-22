@@ -3,13 +3,15 @@ import { Box, HStack, Stack, Button, Link as ChakraLink, Spacer } from '@chakra-
 import moment from 'moment'
 import { Laugh } from 'features/types'
 
+import { POLYBASE_SCHEMA_COLLECTION_EXPLORER_URL } from 'config/polybase'
+
 export interface LaughBoxProps {
   laugh: Laugh
 }
 
 
 export function LaughBox({ laugh }: LaughBoxProps) {
-  const link = `${process.env.POLYBASE_JOKINGON_COLLECTION_EXPLORER_URL}/laughs/${laugh.id}`
+  const link = `${POLYBASE_SCHEMA_COLLECTION_EXPLORER_URL}/laughs/${laugh.id}`
 
   return (
     <Box bg='bw.50' borderRadius='md' p={4} key={laugh.id}>

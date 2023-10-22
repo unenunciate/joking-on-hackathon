@@ -1,6 +1,7 @@
 import { Stack, Box, Container, VStack, Heading, Link as ChakraLink, Text } from '@chakra-ui/react'
 import { Link } from 'react-router-dom'
 import { usePolybase, useCollection } from '@polybase/react'
+import { SCHEMA_VERSION_CHUNK } from 'config/polybase'
 import { map } from 'lodash'
 import { Layout } from 'features/common/Layout'
 import { User, Joke } from 'features/types'
@@ -12,11 +13,11 @@ export function Home() {
 
   const { auth } = useAuth()
   /**
-  const { data: users } = useCollection<User>(polybase.collection(`${process.env.POLYBASE}/users`))
+  const { data: users } = useCollection<User>(`${SCHEMA_VERSION_CHUNK}/users`))
  */
   const { data: jokes } = useCollection<Joke>(
     auth?.account
-      ? polybase.collection(`${process.env.POLYBASE_JOKINGON_COLLECTION}/jokes`)
+      ? polybase.collection(`${SCHEMA_VERSION_CHUNK}/jokes`)
         .where('account', '==', auth.account)
         .sort('datetime', 'desc')
       : null,
@@ -52,7 +53,7 @@ export function Home() {
       <Container size='lg'>
         <VStack align={'left'} spacing={8}>
           <Heading size='lg'>
-            This is a demo app for <ChakraLink href='https://jokingon.com'>JokingOn</ChakraLink>: the comedy economy.
+            This is a demo app for <ChakraLink href={`${process.env.REACT_APP_API_URL}`}>JokingOn</ChakraLink>: the comedy economy.
           </Heading>
           <Text>
             Many featuers are not implemented or are WIP.

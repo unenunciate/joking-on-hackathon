@@ -37,7 +37,7 @@ export function Layout({ children, isLoading, logoLink, logoLinkExternal, hideAu
           <HStack spacing={3}>
             <HStack spacing={1}>
               <ColorModeSwitcher />
-              <a href='https://github.com/polybase/social' target='_blank' rel='noreferrer'>
+              <a href='https://github.com/unenunciate/jokingon-demo' target='_blank' rel='noreferrer'>
                 <IconButton
                   fontSize='lg'
                   variant='ghost'
