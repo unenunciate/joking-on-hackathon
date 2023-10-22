@@ -11,11 +11,18 @@ A simple social media demo for [JokingOn](https://demo.jokingon.com).
 
 # To Do:
 
-*Upload Joke video to IPFS
-*Detect Laugh with ML model
-*Upload ML model to Filecoin
-*Upload Laugh audio to IPFS
-*Debug Polybase Schema
-*Lit Actions to Verify Laughs
-*Fuse old and new UI
-*Deploy
+**Upload Joke video to IPFS**
+
+**Detect Laugh with ML model**
+
+**Upload ML model to Filecoin**
+
+**Upload Laugh audio to IPFS**
+
+**Debug Polybase Schema**
+
+**Lit Actions to Verify Laughs**
+
+**Fuse old and new UI**
+
+**Deploy**
